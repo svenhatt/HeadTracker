@@ -18,14 +18,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     boardbno055.cpp \
     boardnano33ble.cpp \
-    boardtype.cpp \
-    calibrate/fusion.cpp \
-    calibrate/imuread.cpp \
-    calibrate/magcal.cpp \
-    calibrate/mahony.cpp \
-    calibrate/matrix.cpp \
-    calibrate/quality.cpp \
-    calibrate/rawdata.cpp \
+    boardtype.cpp \    
     calibrateble.cpp \
     calibratebno.cpp \
     channelviewer.cpp \
@@ -44,12 +37,10 @@ SOURCES += \
     trackersettings.cpp \
     ucrc16lib.cpp
 
-
 HEADERS += \
     boardbno055.h \
     boardnano33ble.h \
     boardtype.h \
-    calibrate/imuread.h \
     calibrateble.h \
     calibratebno.h \
     channelviewer.h \
@@ -67,6 +58,20 @@ HEADERS += \
     trackersettings.h \
     ucrc16lib.h
 
+!android {
+SOURCES += calibrate/fusion.cpp \
+    calibrate/imuread.cpp \
+    calibrate/magcal.cpp \
+    calibrate/mahony.cpp \
+    calibrate/matrix.cpp \
+    calibrate/quality.cpp \
+    calibrate/rawdata.cpp
+HEADERS +=
+    calibrate/imuread.h \
+
+LIBS += -lOpengl32 -lglu32
+}
+
 FORMS += \
     calibrateble.ui \
     calibratebno.ui \
@@ -82,8 +87,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RESOURCES += \
     Resources.qrc
-
-LIBS += -lOpengl32 -lglu32
 
 COPIES += stylesheets
 stylesheets.files = $$files("css/*.*")

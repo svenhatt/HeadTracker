@@ -1,6 +1,7 @@
 #include "calibrateble.h"
 #include "ui_calibrateble.h"
 
+
 CalibrateBLE::CalibrateBLE(TrackerSettings *ts, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::CalibrateBLE),

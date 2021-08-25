@@ -1,6 +1,8 @@
 #ifndef IMUREAD_H
 #define IMUREAD_H
 
+#ifndef Q_OS_ANDROID
+
 #include <QObject>
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,15 +26,13 @@ signals:
 
 };
 
-#define WINDOWS
-
 #if defined(LINUX)
   #include <termios.h>
   #include <unistd.h>
   #include <GL/gl.h>  // sudo apt install mesa-common-dev
   #include <GL/glu.h> // sudo apt install libglu1-mesa-dev freeglut3-dev
 #elif defined(WINDOWS)
-  #include <windows.h>
+  //#include <windows.h>
   #include <GL/gl.h>
   #include <GL/glu.h>
   #define random() rand()
@@ -179,5 +179,7 @@ void fusion_read(Quaternion_t *q);
 #ifdef __cplusplus
 } // extern "C"
 #endif
+
+#endif // ANDROID
 
 #endif // IMUREAD_H

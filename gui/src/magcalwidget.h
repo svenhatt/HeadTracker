@@ -2,9 +2,10 @@
 #define MAGCALWIDGET_H
 
 #include <QOpenGLWidget>
+#ifndef Q_OS_ANDROID
 #include "calibrate/imuread.h"
+#endif
 #include "trackersettings.h"
-
 
 class MagCalWidget : public QOpenGLWidget
 {
@@ -19,12 +20,15 @@ protected:
     void resizeGL(int w, int h) override;
     void paintGL() override;
 
+
 private:
     void initalizeGL();
     TrackerSettings *trkset;
 
+#ifndef Q_OS_ANDROID
     GLuint spherelist;
     GLuint spherelowreslist;
+#endif
 
     int invert_q0=0;
     int invert_q1=0;

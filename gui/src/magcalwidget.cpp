@@ -5,9 +5,10 @@
 #include <QOpenGLFunctions>
 #include <QtOpenGL>
 #include "calibrate/imuread.h"
-#include "GL/glu.h"
 #include "magcalwidget.h"
 #include "calibrate/visualize.h"
+
+#ifndef Q_OS_ANDROID
 
 static const GLfloat light_ambient[4]  = { 0.0f, 0.0f, 0.0f, 1.0f };
 static const GLfloat light_diffuse[4]  = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -22,6 +23,8 @@ static const GLfloat high_shininess[1] = { 100.0f };
 MagCalibration_t magcal;
 Quaternion_t current_orientation;
 
+
+
 static void rotate(const Point_t *in, Point_t *out, const float *rmatrix)
 {
     out->x = in->x * rmatrix[0] + in->y * rmatrix[1] + in->z * rmatrix[2];
@@ -31,6 +34,7 @@ static void rotate(const Point_t *in, Point_t *out, const float *rmatrix)
 
 static void quad_to_rotation(const Quaternion_t *quat, float *rmatrix)
 {
+
     float qw = quat->q0;
     float qx = quat->q1;
     float qy = quat->q2;
@@ -44,10 +48,12 @@ static void quad_to_rotation(const Quaternion_t *quat, float *rmatrix)
     rmatrix[6] = 2.0f * qx * qz - 2.0f * qy * qw;
     rmatrix[7] = 2.0f * qy * qz + 2.0f * qx * qw;
     rmatrix[8] = 1.0f  - 2.0f * qx * qx - 2.0f * qy * qy;
+
 }
 
 void apply_calibration(int16_t rawx, int16_t rawy, int16_t rawz, Point_t *out)
 {
+
     float x, y, z;
 
     x = ((float)rawx * UT_PER_COUNT) - magcal.V[0];
@@ -58,22 +64,26 @@ void apply_calibration(int16_t rawx, int16_t rawy, int16_t rawz, Point_t *out)
     out->z = x * magcal.invW[2][0] + y * magcal.invW[2][1] + z * magcal.invW[2][2];
 }
 
+
 void calibration_confirmed(void)
 {
     //show_calibration_confirmed = true;
 }
+#endif
 
 MagCalWidget::MagCalWidget(QWidget *parent) : QOpenGLWidget(parent)
 {
-
+#ifndef Q_OS_ANDROID
     raw_data_reset();
 
     //visualize_init();
+#endif
 }
 
 
 void MagCalWidget::rawMagChanged(float x, float y, float z)
 {
+#ifndef Q_OS_ANDROID
     int16_t data[9] = {0,0,0,0,0,0,0,0,0};
     points=(points+1)%MAGBUFFSIZE;
     data[6] = x*10;
@@ -83,21 +93,27 @@ void MagCalWidget::rawMagChanged(float x, float y, float z)
     // Do the stuff
     raw_data(data);
     update();
+#endif
 }
 
 void MagCalWidget::setTracker(TrackerSettings *trk)
 {
+#ifndef Q_OS_ANDROID
     trkset = trk;
     connect(trkset,&TrackerSettings::rawMagChanged,this,&MagCalWidget::rawMagChanged);
+#endif
 }
 
 void MagCalWidget::resetDataPoints()
 {
+#ifndef Q_OS_ANDROID
     raw_data_reset();
+#endif
 }
 
 void MagCalWidget::initializeGL()
 {
+#ifndef Q_OS_ANDROID
     GLUquadric *sphere;
 
     glClearColor(1.0, 1.0, 1.0, 1.0);
@@ -135,10 +151,12 @@ void MagCalWidget::initializeGL()
     // Set up the rendering context, load shaders and other resources, etc.:
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     f->glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+#endif
 }
 
 void MagCalWidget::resizeGL(int width, int height)
 {
+#ifndef Q_OS_ANDROID
     const float ar = (float) width / (float) height;
 
     glViewport(0, 0, width, height);
@@ -148,10 +166,12 @@ void MagCalWidget::resizeGL(int width, int height)
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity() ;
+#endif
 }
 
 void MagCalWidget::paintGL()
 {
+#ifndef Q_OS_ANDROID
     int i;
     float xscale, yscale, zscale;
     float xoff, yoff, zoff;
@@ -236,5 +256,6 @@ void MagCalWidget::paintGL()
         quality_magnitude_variance_error(),
         quality_wobble_error(),
         quality_spherical_fit_error());
+#endif
 #endif
 }

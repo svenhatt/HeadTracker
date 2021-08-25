@@ -1,3 +1,4 @@
+#include <QtCore>
 #include "boardnano33ble.h"
 
 BoardNano33BLE::BoardNano33BLE(TrackerSettings *ts)
@@ -410,7 +411,10 @@ void BoardNano33BLE::nakError()
         }
     } else {
         // Pause a bit, give time for device to catch up
-        Sleep(TX_FAULT_PAUSE);
+
+        QTime dieTime= QTime::currentTime().addMSecs(TX_FAULT_PAUSE);
+        while (QTime::currentTime() < dieTime)
+            QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 
         // Resend last JSON
         serialDataOut += lastjson;
