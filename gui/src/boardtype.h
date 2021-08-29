@@ -2,7 +2,14 @@
 #define BOARDTYPE_H
 
 #include <QObject>
+
+#ifndef Q_OS_ANDROID
 #include <QSerialPort>
+#else
+#include "libs/qtandroidserialport/src/qserialport.h"
+#endif
+
+#include "libs/qtandroidserialport/src/qserialport.h"
 #include "trackersettings.h"
 
 #define ALWACCESS(r, n, f, p) virtual r n (f p) = 0; \

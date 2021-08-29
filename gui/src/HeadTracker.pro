@@ -1,4 +1,4 @@
-QT       += core gui serialport network
+QT += core gui network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets opengl
 
@@ -27,8 +27,7 @@ SOURCES += \
     gainslider.cpp \
     imageviewer/imageviewer.cpp \
     magcalwidget.cpp \
-    main.cpp \
-    mainwindow.cpp \
+    main.cpp \    
     led.cpp \
     graph.cpp \
     popupslider.cpp \
@@ -49,7 +48,6 @@ HEADERS += \
     gainslider.h \
     imageviewer/imageviewer.h \
     magcalwidget.h \
-    mainwindow.h \
     led.h \
     graph.h \
     popupslider.h \
@@ -58,27 +56,38 @@ HEADERS += \
     trackersettings.h \
     ucrc16lib.h
 
+FORMS += calibrateble.ui \
+    calibratebno.ui \
+    channelviewer.ui \
+    diagnosticdisplay.ui \
+    firmwarewizard.ui
+
 !android {
+QT += serialport
+
 SOURCES += calibrate/fusion.cpp \
     calibrate/imuread.cpp \
     calibrate/magcal.cpp \
     calibrate/mahony.cpp \
     calibrate/matrix.cpp \
     calibrate/quality.cpp \
+    mainwindow.cpp \
     calibrate/rawdata.cpp
-HEADERS +=
-    calibrate/imuread.h \
+
+HEADERS += mainwindow.h \
+    calibrate/imuread.h
+
+FORMS += mainwindow.ui
 
 LIBS += -lOpengl32 -lglu32
 }
 
-FORMS += \
-    calibrateble.ui \
-    calibratebno.ui \
-    channelviewer.ui \
-    diagnosticdisplay.ui \
-    firmwarewizard.ui \
-    mainwindow.ui
+android {
+SOURCES += mainwindow.cpp
+HEADERS += mainwindow.h
+FORMS += android_mainwindow.ui
+include(android.pri)
+}
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -116,6 +125,13 @@ win32 {
 }
 
 DISTFILES += \
-    Revisions.txt
-
-
+    Revisions.txt \
+    android/AndroidManifest.xml \
+    android/build.gradle \
+    android/gradle.properties \
+    android/gradle/wrapper/gradle-wrapper.jar \
+    android/gradle/wrapper/gradle-wrapper.properties \
+    android/gradlew \
+    android/gradlew.bat \
+    localfirmware.ini \
+    sources.ini

@@ -2,12 +2,17 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#ifndef Q_OS_ANDROID
 #include <QSerialPort>
+#include <QSerialPortInfo>
+#else
+#include "libs/qtandroidserialport/src/qserialport.h"
+#include "libs/qtandroidserialport/src/qserialportinfo.h"
+#endif
 #include <QTimer>
 #include <QDebug>
 #include <QMessageBox>
 #include <QScrollBar>
-#include <QSerialPortInfo>
 #include <QFileDialog>
 #include <QSettings>
 #include <QCloseEvent>

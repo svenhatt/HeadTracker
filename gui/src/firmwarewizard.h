@@ -9,8 +9,13 @@
 #include <QMessageBox>
 #include <QProcess>
 #include <QPlainTextEdit>
+#ifndef Q_OS_ANDROID
 #include <QSerialPort>
 #include <QSerialPortInfo>
+#else
+#include "libs/qtandroidserialport/src/qserialport.h"
+#include "libs/qtandroidserialport/src/qserialportinfo.h"
+#endif
 #include <QTimer>
 #include <QSettings>
 
