@@ -7,7 +7,7 @@
 #include <sys/printk.h>
 #include <sys/util.h>
 #include <string.h>
-#include <power/power.h>
+#include <pm/pm.h>
 #include <nrfx_rtc.h>
 #include <usb/usb_device.h>
 #include <drivers/uart.h>
