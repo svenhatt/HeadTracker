@@ -13,8 +13,6 @@
 #include "io.h"
 
 static const struct device *hdev;
-static enum usb_dc_status_code usb_status;
-static uint16_t channeldata[16];
 
 //#define JOYSTICK_BUTTONS *** TO DO, Doesn't work
 
@@ -82,12 +80,6 @@ static const uint8_t hid_report_desc[] = {
 };
 
 
-
-static void status_cb(enum usb_dc_status_code status, const uint8_t *param)
-{
-    usb_status = status;
-}
-
 void joystick_init(void)
 {
 #ifndef CONFIG_USB_DEVICE_HID
@@ -102,7 +94,7 @@ void joystick_init(void)
 	usb_hid_register_device(hdev, hid_report_desc, sizeof(hid_report_desc),
 				NULL);
 
-    int a  = usb_hid_init(hdev);
+    usb_hid_init(hdev);
 
     // USB enabled in serial.cpp
 }
