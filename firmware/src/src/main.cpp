@@ -12,9 +12,9 @@
 #include <usb/usb_device.h>
 #include <drivers/uart.h>
 #include "nano33ble.h"
-#include "include/arduino_nano_33_ble.h"
+#include "io.h"
 
-struct arduino_gpio_t S_gpios;
+arduino_gpio_t S_gpios;
 
 #ifdef DISABLE_SLEEP_STATES
 
@@ -58,8 +58,5 @@ static int board_internal_sensors_init(const struct device *dev)
 
 	return 0;
 }
-
-
-
 
 SYS_INIT(board_internal_sensors_init, PRE_KERNEL_1, 32);
