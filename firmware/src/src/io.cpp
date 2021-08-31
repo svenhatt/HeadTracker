@@ -9,6 +9,7 @@ volatile int butpin;
 int dpintoport[] = {1,1, 1 ,1 ,1 ,1 ,1 ,0 ,0 ,0 ,1 ,1 ,1 ,0 };
 int dpintopin[]  = {3,10,11,12,15,13,14,23,21,27,2 ,1 ,8 ,13};
 
+// Called from main.cpp on initalization
 void arduino_gpio_init(arduino_gpio_t *gpios)
 {
 	gpios->gpios[0] = device_get_binding("GPIO_0");
