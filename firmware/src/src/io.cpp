@@ -12,8 +12,8 @@ int dpintopin[]  = {3,10,11,12,15,13,14,23,21,27,2 ,1 ,8 ,13};
 // Called from main.cpp on initalization
 void arduino_gpio_init(arduino_gpio_t *gpios)
 {
-	gpios->gpios[0] = device_get_binding("GPIO_0");
-	gpios->gpios[1] = device_get_binding("GPIO_1");
+	gpios->gpios[0] = DEVICE_DT_GET(DT_NODELABEL(gpio0));
+	gpios->gpios[1] = DEVICE_DT_GET(DT_NODELABEL(gpio0));
 }
 
 void io_Init()
