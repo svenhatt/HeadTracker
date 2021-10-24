@@ -489,7 +489,7 @@ void BTRmtStop()
 
     // Reset all BT channels to center
     for(int i = 0; i <BT_CHANNELS; i++)
-        chan_vals[i] = TrackerSettings::PPM_CENTER;
+        chan_vals[i] = PPM_CENTER;
 
     bt_conn_cb_register(NULL);
 }

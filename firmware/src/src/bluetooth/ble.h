@@ -16,7 +16,8 @@ typedef enum {
     BTDISABLE=0,
     BTPARAHEAD,
     BTPARARMT,
-    BTSCANONLY
+    BTSCANONLY,
+    BTCOUNT
 } btmodet;
 
 void bt_Thread();

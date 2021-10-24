@@ -39,11 +39,11 @@ static int setPin=-1;
 
 // Used to read data at once, read with isr disabled
 static uint16_t ch_values[16];
-static int ch_count=TrackerSettings::DEF_PPM_CHANNELS;
+static int ch_count=DEF_PPM_CHANNELS;
 
-static uint16_t framesync = TrackerSettings::PPM_MIN_FRAMESYNC; // Minimum Frame Sync Pulse
-static int32_t framelength = TrackerSettings::DEF_PPM_FRAME; // Ideal frame length
-static uint16_t sync = TrackerSettings::DEF_PPM_SYNC; // Sync Pulse Length
+static uint16_t framesync = PPM_MIN_FRAMESYNC; // Minimum Frame Sync Pulse
+static int32_t framelength = DEF_PPM_FRAME; // Ideal frame length
+static uint16_t sync = DEF_PPM_SYNC; // Sync Pulse Length
 
 // Local data - Only build with interrupts disabled
 static uint32_t chsteps[35] {framesync,sync};
@@ -62,9 +62,9 @@ void buildChannels()
     buildingdata = true; // Prevent a read happing while this is building
 
     // Set user defined channel count, frame len, sync pulse
-    ch_count = trkset.ppmChCount();
-    sync = trkset.ppmSync();
-    framelength = trkset.ppmFrame();
+    ch_count = trkset.getppmchcnt();
+    sync = trkset.getppmsync();
+    framelength = trkset.getppmfrm();
 
     int ch=0;
     int i;
@@ -240,7 +240,7 @@ void PpmOut_execute()
 void PpmOut_setChannel(int chan, uint16_t val)
 {
     if(chan >= 0 && chan <= ch_count &&
-       val >= TrackerSettings::MIN_PWM && val <= TrackerSettings::MAX_PWM) {
+       val >= MIN_PWM && val <= MAX_PWM) {
         ch_values[chan] = val;
     }
     buildChannels();

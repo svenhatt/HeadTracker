@@ -35,7 +35,7 @@ int PWM_Init(int updateRate)
     usperiod = (1/(float)updateRate * 1000000);
 
     for(int i = 0; i <4;i++) {
-        pwmvals[i] = usperiod - TrackerSettings::PPM_CENTER;
+        pwmvals[i] = usperiod - PPM_CENTER;
     }
 
 
@@ -76,7 +76,7 @@ void setPWMValue(int ch, uint16_t value)
         return;
 
     // Set PPM Channel, Limited to min/max
-    pwmvals[ch] = usperiod - MAX(MIN(value,TrackerSettings::MAX_PWM),TrackerSettings::MIN_PWM);
+    pwmvals[ch] = usperiod - MAX(MIN(value,MAX_PWM),MIN_PWM);
 
     NRF_PWM0->TASKS_SEQSTART[0] = 1;
 }

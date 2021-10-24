@@ -122,7 +122,7 @@ void BTHeadStart()
 
     // Center all Channels
     for(int i=0;i < BT_CHANNELS;i++) {
-        chan_vals[i] = TrackerSettings::PPM_CENTER;
+        chan_vals[i] = PPM_CENTER;
     }
 
     serialWriteln("HT: BLE Starting Head Bluetooth");
@@ -202,7 +202,7 @@ void BTHeadSetChannel(int channel, const uint16_t value)
     // Actuall send it at center so PARA still works
     if(value == 0) {
         ovridech &= ~(1<<channel);
-        chan_vals[channel] = TrackerSettings::PPM_CENTER;
+        chan_vals[channel] = PPM_CENTER;
 
     // Otherwise set the value and set that it is valid
     } else {

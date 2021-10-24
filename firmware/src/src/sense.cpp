@@ -203,23 +203,23 @@ void calculate_Thread()
         }
 
         // Tilt output
-        float tiltout = (tilt - tiltoffset) * trkset.Tlt_gain() * (trkset.isTiltReversed()?-1.0:1.0);
-        float beta = (float)trkset.lpTiltRoll() / 100;                        // LP Beta
+        float tiltout = (tilt - tiltoffset) * trkset.gettlt_gain() * (trkset.isTiltReversed()?-1.0:1.0);
+        float beta = (float)trkset.getlptiltroll() / 100;                        // LP Beta
         filter_expAverage(&tiltout, beta, &l_tiltout);
-        uint16_t tiltout_ui = tiltout + trkset.Tlt_cnt();                     // Apply Center Offset
-        tiltout_ui = MAX(MIN(tiltout_ui,trkset.Tlt_max()),trkset.Tlt_min());  // Limit Output
+        uint16_t tiltout_ui = tiltout + trkset.gettlt_cnt();                     // Apply Center Offset
+        tiltout_ui = MAX(MIN(tiltout_ui,trkset.gettlt_max()),trkset.gettlt_min());  // Limit Output
 
         // Roll output
-        float rollout = (roll - rolloffset) * trkset.Rll_gain() * (trkset.isRollReversed()? -1.0:1.0);
+        float rollout = (roll - rolloffset) * trkset.getrll_gain() * (trkset.isRollReversed()? -1.0:1.0);
         filter_expAverage(&rollout, beta, &l_rollout);
-        uint16_t rollout_ui = rollout + trkset.Rll_cnt();                     // Apply Center Offset
-        rollout_ui = MAX(MIN(rollout_ui,trkset.Rll_max()),trkset.Rll_min());  // Limit Output
+        uint16_t rollout_ui = rollout + trkset.getrll_cnt();                     // Apply Center Offset
+        rollout_ui = MAX(MIN(rollout_ui,trkset.getrll_max()),trkset.getrll_min());  // Limit Output
 
         // Pan output, Normalize to +/- 180 Degrees
-        float panout = normalize((pan-panoffset),-180,180)  * trkset.Pan_gain() * (trkset.isPanReversed()? -1.0:1.0);
-        filter_expAverage(&panout, (float)trkset.lpPan() / 100, &l_panout);
-        uint16_t panout_ui = panout + trkset.Pan_cnt();                    // Apply Center Offset
-        panout_ui = MAX(MIN(panout_ui,trkset.Pan_max()),trkset.Pan_min()); // Limit Output
+        float panout = normalize((pan-panoffset),-180,180)  * trkset.getpan_gain() * (trkset.isPanReversed()? -1.0:1.0);
+        filter_expAverage(&panout, (float)trkset.getlppan() / 100, &l_panout);
+        uint16_t panout_ui = panout + trkset.getpan_cnt();                    // Apply Center Offset
+        panout_ui = MAX(MIN(panout_ui,trkset.getpan_max()),trkset.getpan_min()); // Limit Output
 
         /* ************************************************************
         *       Build channel data
@@ -296,60 +296,61 @@ void calculate_Thread()
         }
 
         // 6) Set Auxiliary Functions
-        int aux0ch = trkset.auxFunc0Ch();
-        int aux1ch = trkset.auxFunc1Ch();
-        int aux2ch = trkset.auxFunc2Ch();
+        int aux0ch = trkset.getaux0ch();
+        int aux1ch = trkset.getaux1ch();
+        int aux2ch = trkset.getaux2ch();
         if(aux0ch > 0 || aux1ch > 0) {
             buildAuxData();
             if(aux0ch > 0)
-                channel_data[aux0ch - 1] = auxdata[trkset.auxFunc0()];
+                channel_data[aux0ch - 1] = auxdata[trkset.getaux0func()];
             if(aux1ch > 0)
-                channel_data[aux1ch - 1] = auxdata[trkset.auxFunc1()];
+                channel_data[aux1ch - 1] = auxdata[trkset.getaux1func()];
             if(aux2ch > 0)
-                channel_data[aux2ch - 1] = auxdata[trkset.auxFunc2()];
+                channel_data[aux2ch - 1] = auxdata[trkset.getaux2func()];
         }
 
         // 7) Set Analog Channels
-        if(trkset.analog4Ch() > 0) {
+        if(trkset.getan4ch() > 0) {
             float an4 = SF1eFilterDo(anFilter[0], analogRead(AN4));
-            an4 *= trkset.analog4Gain();
-            an4 += trkset.analog4Offset();
-            an4 += TrackerSettings::MIN_PWM;
-            an4 = MAX(TrackerSettings::MIN_PWM,MIN(TrackerSettings::MAX_PWM,an4));
-            channel_data[trkset.analog4Ch()-1] = an4;
+            an4 *= trkset.getan4gain();
+            an4 += trkset.getan4off();
+            an4 += MIN_PWM;
+            an4 = MAX(MIN_PWM,MIN(MAX_PWM,an4));
+            channel_data[trkset.getan4ch()-1] = an4;
         }
-        if(trkset.analog5Ch() > 0) {
+        if(trkset.getan5ch() > 0) {
             float an5 = SF1eFilterDo(anFilter[1], analogRead(AN5));
-            an5 *= trkset.analog5Gain();
-            an5 += trkset.analog5Offset();
-            an5 += TrackerSettings::MIN_PWM;
-            an5 = MAX(TrackerSettings::MIN_PWM,MIN(TrackerSettings::MAX_PWM,an5));
-            channel_data[trkset.analog5Ch()-1] = an5;
+            an5 *= trkset.getan5gain();
+            an5 += trkset.getan5off();
+            an5 += MIN_PWM;
+            an5 = MAX(MIN_PWM,MIN(MAX_PWM,an5));
+            channel_data[trkset.getan5ch()-1] = an5;
         }
-        if(trkset.analog6Ch() > 0) {
+        if(trkset.getan6ch() > 0) {
 	        float an6 = SF1eFilterDo(anFilter[2], analogRead(AN6));
-            an6 *= trkset.analog6Gain();
-            an6 += trkset.analog6Offset();
-            an6 += TrackerSettings::MIN_PWM;
-            an6 = MAX(TrackerSettings::MIN_PWM,MIN(TrackerSettings::MAX_PWM,an6));
-            channel_data[trkset.analog6Ch()-1] = an6;
+            an6 *= trkset.getan6gain();
+            an6 += trkset.getan6off();
+            an6 += MIN_PWM;
+            an6 = MAX(MIN_PWM,MIN(MAX_PWM,an6));
+            channel_data[trkset.getan6ch()-1] = an6;
         }
-        if(trkset.analog7Ch() > 0) {
+        if(trkset.getan7ch() > 0) {
             float an7 = SF1eFilterDo(anFilter[3], analogRead(AN7));
-            an7 *= trkset.analog7Gain();
-            an7 += trkset.analog7Offset();
-            an7 += TrackerSettings::MIN_PWM;
-            an7 = MAX(TrackerSettings::MIN_PWM,MIN(TrackerSettings::MAX_PWM,an7));
-            channel_data[trkset.analog7Ch()-1] = an7;
+            an7 *= trkset.getan7gain();
+            an7 += trkset.getan7off();
+            an7 += MIN_PWM;
+            an7 = MAX(MIN_PWM,MIN(MAX_PWM,an7));
+            channel_data[trkset.getan7ch()-1] = an7;
         }
 
         // 8) Set Tilt/Roll/Pan Channel Values
-        // Only set these outputs if button press mode is set to off
-        if(trkset.buttonPressMode() == false ||
-           (trkset.buttonPressMode() == true && trpOutputEnabled == true)) {
-            int tltch = trkset.tiltCh();
-            int rllch = trkset.rollCh();
-            int panch = trkset.panCh();
+        // Enable the Tilt/Roll/Pan outputs if long button press is
+        // disabled or enabled and has been long pressed
+        if(trkset.getbutlngps() == false ||
+           (trkset.getbutlngps() == true && trpOutputEnabled == true)) {
+            int tltch = trkset.gettltch();
+            int rllch = trkset.getrllch();
+            int panch = trkset.getpanch();
             if(tltch > 0)
                 channel_data[tltch - 1] = tiltout_ui; // Channel 1 = Index 0
             if(rllch > 0)
@@ -364,7 +365,7 @@ void calculate_Thread()
         for(int i=0;i<PpmOut_getChnCount();i++) {
             uint16_t ppmout = channel_data[i];
             if(ppmout == 0)
-                ppmout = TrackerSettings::PPM_CENTER;
+                ppmout = PPM_CENTER;
             PpmOut_setChannel(i,ppmout);
         }
 
@@ -380,8 +381,8 @@ void calculate_Thread()
         for(int i=0;i<16;i++) {
             uint16_t sbusout = channel_data[i];
             if(sbusout == 0)
-                sbusout = TrackerSettings::PPM_CENTER;
-            sbus_data[i] = (static_cast<float>(sbusout) - TrackerSettings::PPM_CENTER) * TrackerSettings::SBUS_SCALE + TrackerSettings::SBUS_CENTER;
+                sbusout = PPM_CENTER;
+            sbus_data[i] = (static_cast<float>(sbusout) - PPM_CENTER) * SBUS_SCALE + SBUS_CENTER;
         }
         SBUS_TX_BuildData(sbus_data);
 
@@ -391,7 +392,7 @@ void calculate_Thread()
             if(pwmch >= 0 && pwmch < 16) {
                 uint16_t pwmout = channel_data[pwmch];
                 if(pwmout == 0)
-                    pwmout = TrackerSettings::PPM_CENTER;
+                    pwmout = PPM_CENTER;
                 setPWMValue(i,pwmout);
             }
         }
@@ -641,13 +642,13 @@ void reset_fusion()
 
 void buildAuxData()
 {
-    float pwmrange = (TrackerSettings::MAX_PWM - TrackerSettings::MIN_PWM);
-    auxdata[0] = (gyrx / 1000) * pwmrange + TrackerSettings::PPM_CENTER;
-    auxdata[1] = (gyry / 1000) * pwmrange + TrackerSettings::PPM_CENTER;
-    auxdata[2] = (gyrz / 1000) * pwmrange + TrackerSettings::PPM_CENTER;
-    auxdata[3] = (accx / 2.0f) * pwmrange + TrackerSettings::PPM_CENTER;
-    auxdata[4] = (accy / 2.0f) * pwmrange + TrackerSettings::PPM_CENTER;
-    auxdata[5] = (accz / 1.0f) * pwmrange + TrackerSettings::PPM_CENTER;
-    auxdata[6] = ((accz -1.0f) / 2.0f) * pwmrange + TrackerSettings::PPM_CENTER;
-    auxdata[7] = static_cast<float>(BTGetRSSI()) / 127.0 * pwmrange + TrackerSettings::MIN_PWM;
+    float pwmrange = (MAX_PWM - MIN_PWM);
+    auxdata[0] = (gyrx / 1000) * pwmrange + PPM_CENTER;
+    auxdata[1] = (gyry / 1000) * pwmrange + PPM_CENTER;
+    auxdata[2] = (gyrz / 1000) * pwmrange + PPM_CENTER;
+    auxdata[3] = (accx / 2.0f) * pwmrange + PPM_CENTER;
+    auxdata[4] = (accy / 2.0f) * pwmrange + PPM_CENTER;
+    auxdata[5] = (accz / 1.0f) * pwmrange + PPM_CENTER;
+    auxdata[6] = ((accz -1.0f) / 2.0f) * pwmrange + PPM_CENTER;
+    auxdata[7] = static_cast<float>(BTGetRSSI()) / 127.0 * pwmrange + MIN_PWM;
 }

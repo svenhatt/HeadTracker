@@ -49,7 +49,7 @@ void io_Thread()
         k_msleep(IO_PERIOD);
 
         static bool lastButtonDown=false;
-        butpin = trkset.buttonPin();
+        butpin = trkset.getbuttonpin();
 
         // Make sure button pin is enabled
         if(butpin < 1 || butpin > 13 )
@@ -67,7 +67,7 @@ void io_Thread()
 
         // Just Released
         } else if(!buttonDown && lastButtonDown) {
-            if(pressedtime > BUTTON_LONG_PRESS_TIME && trkset.buttonPressMode()) {
+            if(pressedtime > BUTTON_LONG_PRESS_TIME && trkset.getbutlngps()) {
                 longPressButton();
             } else if (pressedtime > BUTTON_HOLD_TIME) {
                 pressButton();

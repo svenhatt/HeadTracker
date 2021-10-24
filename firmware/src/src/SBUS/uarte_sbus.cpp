@@ -80,11 +80,11 @@ void SBUS_Thread()
 {
     while(1) {
         if(isSBUSInit) {
-            sbusoutinv = !trkset.invertedSBUSOut();
+            sbusoutinv = !trkset.getsboutinv();
             SBUS_TX_Start();
             SBUSIn_Process();
         }
-        k_usleep((1.0/(float)trkset.SBUSRate()) * 1.0e6);
+        k_usleep((1.0/(float)trkset.getsbrate()) * 1.0e6);
     }
 }
 
@@ -229,7 +229,7 @@ void SBUS_Init()
     // Setup as an input, when TX pin toggles state state causes the event to trigger and through
     // PPI toggle the output pin on next GPIOTE
 
-    // P1.04 is unused and not connected onthe BLE    
+    // P1.04 is unused and not connected onthe BLE
     NRF_GPIOTE->CONFIG[SBUSOUT0_GPIOTE] = (GPIOTE_CONFIG_MODE_Event << GPIOTE_CONFIG_MODE_Pos) |
             (GPIOTE_CONFIG_POLARITY_Toggle << GPIOTE_CONFIG_POLARITY_Pos) |
             (SBUSOUT_TPIN <<  GPIOTE_CONFIG_PSEL_Pos) |
