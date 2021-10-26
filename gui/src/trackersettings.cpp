@@ -4,25 +4,13 @@
 TrackerSettings::TrackerSettings(QObject *parent):
     QObject(parent)
 {
-    // Defaults
-    _data["rll_min"] = DEF_MIN_PWM;
-    _data["rll_max"] = DEF_MAX_PWM;
-    _data["rll_gain"] = DEF_GAIN;
-    _data["rll_cnt"] = PPM_CENTER;
 
-    _data["pan_min"] = DEF_MIN_PWM;
-    _data["pan_max"] = DEF_MAX_PWM;
-    _data["pan_gain"] = DEF_GAIN;
-    _data["pan_cnt"] = PPM_CENTER;
+    // Set defaults for MIN/MAX settings
+    // Type, name, default, min, max
+    #define DS(DT, NAME, DEFAULT, MINV, MAXV) _data[ #NAME ] = DEFAULT;
+        SETTINGS_MINMAX
+    #undef DS
 
-    _data["tlt_min"] = DEF_MIN_PWM;
-    _data["tlt_max"] = DEF_MAX_PWM;
-    _data["tlt_gain"] = DEF_GAIN;
-    _data["tlt_cnt"] = PPM_CENTER;
-
-    _data["panch"] = DEF_PAN_CH;
-    _data["tltch"] = DEF_TILT_CH;
-    _data["rllch"] = DEF_ROLL_CH;
 
     _data["servoreverse"] = (uint)0x00;
 

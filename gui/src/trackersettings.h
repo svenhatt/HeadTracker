@@ -13,6 +13,66 @@
 #define Y_REV 0x02
 #define Z_REV 0x01
 
+// Defaults, Mins/Maxes
+#define MIN_PWM 988
+#define MAX_PWM 2012
+#define DEF_MIN_PWM 1050
+#define DEF_MAX_PWM 1950
+#define MINMAX_RNG 242
+#define MIN_CNT (((MAX_PWM-MIN_PWM)/2)+MIN_PWM-MINMAX_RNG)
+#define MAX_CNT (((MAX_PWM-MIN_PWM)/2)+MIN_PWM+MINMAX_RNG)
+#define HT_TILT_REVERSE_BIT 0x01
+#define HT_ROLL_REVERSE_BIT 0x02
+#define HT_PAN_REVERSE_BIT 0x04
+#define CHANNEL_COUNT 16
+#define DEF_PPM_CHANNELS 8
+#define DEF_PPM_FRAME 22500
+#define PPM_MAX_FRAME 40000
+#define PPM_MIN_FRAME 12500
+#define PPM_MIN_FRAMESYNC 4000 // Not adjustable
+#define DEF_PPM_SYNC 350
+#define PPM_MAX_SYNC 800
+#define PPM_MIN_SYNC 100
+#define DEF_BOARD_ROT_X 0
+#define DEF_BOARD_ROT_Y 0
+#define DEF_BOARD_ROT_Z 0
+#define DEF_BUTTON_IN 2 // Chosen because it's beside ground
+#define DEF_BUTTON_LONG_PRESS true
+#define DEF_PPM_OUT 10 // Random choice
+#define DEF_PPM_IN -1
+#define PPM_CENTER 1500
+#define SBUS_CENTER 992
+#define SBUS_SCALE 1.6f
+#define MIN_GAIN 0.0
+#define MAX_GAIN 35.0
+#define DEF_GAIN 5.0
+#define DEF_BT_MODE BTDISABLE // Bluetooth Disabled
+#define DEF_RST_PPM -1
+#define DEF_TILT_CH 1
+#define DEF_ROLL_CH 2
+#define DEF_PAN_CH 3
+#define DEF_LP_PAN 75
+#define DEF_LP_TLTRLL 75
+#define DEF_PWM_A0_CH -1
+#define DEF_PWM_A1_CH -1
+#define DEF_PWM_A2_CH -1
+#define DEF_PWM_A3_CH -1
+#define DEF_SBUS_IN_INV false
+#define DEF_SBUS_OUT_INV false
+#define DEF_SBUS_RATE 60
+#define DEF_ALG_A4_CH -1
+#define DEF_ALG_A5_CH -1
+#define DEF_ALG_A6_CH -1
+#define DEF_ALG_A7_CH -1
+#define DEF_ALG_GAIN 310.00f
+#define DEF_ALG_OFFSET 0
+#define DEF_AUX_CH0 -1
+#define DEF_AUX_CH1 -1
+#define DEF_AUX_CH2 -1
+#define DEF_AUX_FUNC 0
+
+
+
 // Variables to be sent back to GUI if enabled
 // Datatype, Name, UpdateDivisor, RoundTo
 #define DATA_VARS\
@@ -50,6 +110,7 @@
     DV(uint8_t, cpuuse, 1,-1)
 
 // To shorten names, as these are sent to the GUI for decoding
+#define s8 int8_t
 #define u8  uint8_t
 #define u16 uint16_t
 #define s16 int16_t
@@ -57,6 +118,12 @@
 #define s32 int32_t
 #define flt float
 #define chr char
+
+#define COMMA ,
+#define FLOAT_MINIMUM -1000000.0f
+#define FLOAT_MAXIMUM 1000000.0f
+#define MIN_CHANNEL -1
+#define MAX_CHANNEL CHANNEL_COUNT+1
 
 // Arrays to be sent back to GUI if enabled
 #define DATA_ARRAYS\
@@ -68,67 +135,80 @@
     DA(chr, btaddr,18, 20) \
     DA(chr, btrmt,18, 10)
 
+// Basic Settings with a Min/Max
+// Type, name, default, min, max
+#define SETTINGS_MINMAX\
+    DS(u16, tlt_min, DEF_MIN_PWM, MIN_PWM, MAX_PWM)\
+    DS(u16, tlt_max, DEF_MAX_PWM, MIN_PWM, MAX_PWM)\
+    DS(u16, tlt_cnt, PPM_CENTER,  MIN_PWM, MAX_PWM)\
+    DS(u16, rll_min, DEF_MIN_PWM, MIN_PWM, MAX_PWM)\
+    DS(u16, rll_max, DEF_MAX_PWM, MIN_PWM, MAX_PWM)\
+    DS(u16, rll_cnt, PPM_CENTER,  MIN_PWM, MAX_PWM)\
+    DS(u16, pan_min, DEF_MIN_PWM, MIN_PWM, MAX_PWM)\
+    DS(u16, pan_max, DEF_MAX_PWM, MIN_PWM, MAX_PWM)\
+    DS(u16, pan_cnt, PPM_CENTER,  MIN_PWM, MAX_PWM)\
+    DS(float ,tlt_gain, DEF_GAIN, MIN_GAIN, MAX_GAIN)\
+    DS(float, rll_gain, DEF_GAIN, MIN_GAIN, MAX_GAIN)\
+    DS(float, pan_gain, DEF_GAIN, MIN_GAIN, MAX_GAIN)\
+    DS(s8, tltch, DEF_TILT_CH, MIN_CHANNEL, MAX_CHANNEL)\
+    DS(s8, rllch, DEF_ROLL_CH, MIN_CHANNEL, MAX_CHANNEL)\
+    DS(s8, panch, DEF_PAN_CH, MIN_CHANNEL, MAX_CHANNEL)\
+    DS(float, magxoff, 0, FLOAT_MINIMUM, FLOAT_MAXIMUM)\
+    DS(float, magyoff, 0, FLOAT_MINIMUM, FLOAT_MAXIMUM)\
+    DS(float, magzoff, 0, FLOAT_MINIMUM, FLOAT_MAXIMUM)\
+    DS(float, accxoff, 0, FLOAT_MINIMUM, FLOAT_MAXIMUM)\
+    DS(float, accyoff, 0, FLOAT_MINIMUM, FLOAT_MAXIMUM)\
+    DS(float, acczoff, 0, FLOAT_MINIMUM, FLOAT_MAXIMUM)\
+    DS(float, gyrxoff, 0, FLOAT_MINIMUM, FLOAT_MAXIMUM)\
+    DS(float, gyryoff, 0, FLOAT_MINIMUM, FLOAT_MAXIMUM)\
+    DS(float, gyrzoff, 0, FLOAT_MINIMUM, FLOAT_MAXIMUM)\
+    DS(int, rotx, 0, -360, 360)\
+    DS(int, roty, 0, -360, 360)\
+    DS(int, rotz, 0, -360, 360)\
+    DS(u16, servoreverse, 0, 0, 0x07)\
+    DS(u8, lppan, DEF_LP_PAN, 0, 100)\
+    DS(u8, lptiltroll, DEF_LP_TLTRLL, 0, 0)\
+    DS(bool, butlngps, DEF_BUTTON_LONG_PRESS, 0, 1)\
+    DS(bool, ppmoutinvert, false, 0, 1)\
+    DS(bool, ppmininvert, false, 0, 1)\
+    DS(u8, btmode, DEF_BT_MODE, BTDISABLE, BTCOUNT)\
+    DS(bool, rstonwave, false, 0, 1)\
+    DS(bool, rstppm, DEF_RST_PPM, 0, 1)\
+    DS(u16, ppmfrm, DEF_PPM_FRAME, 0, 1)\
+    DS(u16, ppmsync, DEF_PPM_SYNC, 0, 1)\
+    DS(s8, ppmchcnt, DEF_PPM_CHANNELS, 0, 1)\
+    DS(s8, an4ch, DEF_ALG_A4_CH, MIN_CHANNEL, MAX_CHANNEL)\
+    DS(s8, an5ch, DEF_ALG_A5_CH, MIN_CHANNEL, MAX_CHANNEL)\
+    DS(s8, an6ch, DEF_ALG_A6_CH, MIN_CHANNEL, MAX_CHANNEL)\
+    DS(s8, an7ch, DEF_ALG_A6_CH, MIN_CHANNEL, MAX_CHANNEL)\
+    DS(float, an4gain, DEF_ALG_GAIN, FLOAT_MINIMUM, FLOAT_MAXIMUM)\
+    DS(float, an5gain, DEF_ALG_GAIN, FLOAT_MINIMUM, FLOAT_MAXIMUM)\
+    DS(float, an6gain, DEF_ALG_GAIN, FLOAT_MINIMUM, FLOAT_MAXIMUM)\
+    DS(float, an7gain, DEF_ALG_GAIN, FLOAT_MINIMUM, FLOAT_MAXIMUM)\
+    DS(float, an4off, DEF_ALG_OFFSET, FLOAT_MINIMUM, FLOAT_MAXIMUM)\
+    DS(float, an5off, DEF_ALG_OFFSET, FLOAT_MINIMUM, FLOAT_MAXIMUM)\
+    DS(float, an6off, DEF_ALG_OFFSET, FLOAT_MINIMUM, FLOAT_MAXIMUM)\
+    DS(float, an7off, DEF_ALG_OFFSET, FLOAT_MINIMUM, FLOAT_MAXIMUM)\
+    DS(s8, aux0ch, DEF_AUX_CH0, MIN_CHANNEL, MAX_CHANNEL)\
+    DS(s8, aux1ch, DEF_AUX_CH1, MIN_CHANNEL, MAX_CHANNEL)\
+    DS(s8, aux2ch, DEF_AUX_CH2, MIN_CHANNEL, MAX_CHANNEL)\
+    DS(s8, aux0func, DEF_AUX_FUNC, -1, AUX_COUNT)\
+    DS(s8, aux1func, DEF_AUX_FUNC, -1, AUX_COUNT)\
+    DS(s8, aux2func, DEF_AUX_FUNC, -1, AUX_COUNT)\
+    DS(bool, sboutinv, DEF_SBUS_OUT_INV, 0, 1)\
+    DS(bool, sbininv, DEF_SBUS_IN_INV, 0, 1)
+    DS(u8, sbrate, DEF_SBUS_RATE)
+
+
+
 class TrackerSettings : public QObject
 {    
     Q_OBJECT
 public:
     enum {BTDISABLE,BTPARAHEAD,BTPARARMT};
 
-    static constexpr int MIN_PWM=988;
-    static constexpr int MAX_PWM=2012;
-    static constexpr int DEF_MIN_PWM=1050;
-    static constexpr int DEF_MAX_PWM=1950;
-    static constexpr int MINMAX_RNG=242;
-    static constexpr int MIN_CNT=(((MAX_PWM-MIN_PWM)/2)+MIN_PWM-MINMAX_RNG);
-    static constexpr int MAX_CNT=(((MAX_PWM-MIN_PWM)/2)+MIN_PWM+MINMAX_RNG);
-    static constexpr int HT_TILT_REVERSE_BIT  = 0x01;
-    static constexpr int HT_ROLL_REVERSE_BIT  = 0x02;
-    static constexpr int HT_PAN_REVERSE_BIT   = 0x04;
-    static constexpr int DEF_PPM_CHANNELS = 8;
-    static constexpr uint16_t DEF_PPM_FRAME = 22500;
-    static constexpr uint16_t PPM_MAX_FRAME = 40000;
-    static constexpr uint16_t PPM_MIN_FRAME = 12500;
-    static constexpr uint16_t PPM_MIN_FRAMESYNC = 4000; // Not adjustable
-    static constexpr int DEF_PPM_SYNC=350;
-    static constexpr int PPM_MAX_SYNC=800;
-    static constexpr int PPM_MIN_SYNC=100;
-    static constexpr int DEF_BOARD_ROT_X=0;
-    static constexpr int DEF_BOARD_ROT_Y=0;
-    static constexpr int DEF_BOARD_ROT_Z=0;
-    static constexpr int DEF_BUTTON_IN = 2; // Chosen because it's beside ground
-    static constexpr bool DEF_BUTTON_LONG_PRESS = true;
-    static constexpr int DEF_PPM_OUT = 10; // Random choice
-    static constexpr int DEF_PPM_IN = -1;
-    static constexpr int PPM_CENTER = 1500;
-    static constexpr int SBUS_CENTER = 992;
-    static constexpr float SBUS_SCALE = 1.6f;
-    static constexpr float MIN_GAIN= 0.0;
-    static constexpr float MAX_GAIN= 35.0;
-    static constexpr float DEF_GAIN= 5.0;
-    static constexpr int DEF_BT_MODE= BTDISABLE; // Bluetooth Disabled
-    static constexpr int DEF_RST_PPM = -1;
-    static constexpr int DEF_TILT_CH = 1;
-    static constexpr int DEF_ROLL_CH = 2;
-    static constexpr int DEF_PAN_CH = 3;
-    static constexpr int DEF_LP_PAN = 75;
-    static constexpr int DEF_LP_TLTRLL = 75;
-    static constexpr int DEF_PWM_A0_CH = -1;
-    static constexpr int DEF_PWM_A1_CH = -1;
-    static constexpr int DEF_PWM_A2_CH = -1;
-    static constexpr int DEF_PWM_A3_CH = -1;
-    static constexpr bool DEF_SBUS_IN_INV = false;
-    static constexpr bool DEF_SBUS_OUT_INV = false;
-    static constexpr int DEF_SBUS_RATE = 60;
-    static constexpr int DEF_ALG_A4_CH = -1;
-    static constexpr int DEF_ALG_A5_CH = -1;
-    static constexpr int DEF_ALG_A6_CH = -1;
-    static constexpr int DEF_ALG_A7_CH = -1;
-    static constexpr float DEF_ALG_GAIN = 310.00f;
-    static constexpr int DEF_ALG_OFFSET = 0;
-    static constexpr int DEF_AUX_CH0 = -1;
-    static constexpr int DEF_AUX_CH1 = -1;
-    static constexpr int DEF_AUX_CH2 = -1;
-    static constexpr int DEF_AUX_FUNC = 0;
+
+
 
 
     TrackerSettings(QObject *parent=nullptr);
