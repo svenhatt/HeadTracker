@@ -14,7 +14,8 @@
 //-----------------------------------------------------------------------------
 
 #include <Wire.h>
-#include <PinChangeInt.h>
+#include "PinChangeInterrupt.h"
+
 #include "config.h"
 #include "functions.h"
 #include "sensors.h"
@@ -134,8 +135,8 @@ void setup()
     // Add interrupts to pin 2
     pinMode(2, INPUT); digitalWrite(2, HIGH);
     pinMode(3, INPUT); digitalWrite(3, HIGH);
-    PCintPort::attachInterrupt(2, &rising, RISING);
-    PCintPort::attachInterrupt(3, &rising, RISING);
+    attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(A0), tickch1, CHANGE);
+    attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(A1), tickch2, CHANGE);
 
     // Set button pin to input:
     pinMode(BUTTON_INPUT,INPUT);
@@ -763,30 +764,30 @@ uint16_t escapeCRC(uint16_t crc)
     return (uint16_t)crclow | ((uint16_t)crchigh << 8);
 }
 
-volatile unsigned int ch1_value=0;
-volatile unsigned int ch2_value=0;
+volatile unsigned int pwm1_value=0;
+volatile unsigned int pwm2_value=0;
 volatile unsigned int pin2_hightime = 0;
 volatile unsigned int pin3_hightime = 0;
-uint8_t latest_interrupted_pin;
 
-void rising()
+void tickch1()
 {
-    latest_interrupted_pin=PCintPort::arduinoPin;
-    PCintPort::attachInterrupt(latest_interrupted_pin, &falling, FALLING);
-    if(latest_interrupted_pin == 2)
-        pin2_hightime = micros();
-    else
-        pin3_hightime = micros();
+  uint8_t trigger = getPinChangeInterruptTrigger(digitalPinToPCINT(A0));
+
+  if(trigger == RISING) {
+    pin2_hightime = micros();
+  } else if (trigger == FALLING) {
+    pwm1_value = micros()-pin2_hightime;
+  }
+  
 }
 
-void falling()
+void tickch2()
 {
-    latest_interrupted_pin=PCintPort::arduinoPin;
-    PCintPort::attachInterrupt(latest_interrupted_pin, &rising, RISING);
-    if(latest_interrupted_pin == 2)
-        pin2_hightime = micros()-prev_time;
-    else
-        pin3_hightime = micros();
-    pwm_value = micros()-prev_time;
-}
+  uint8_t trigger = getPinChangeInterruptTrigger(digitalPinToPCINT(A1));
 
+  if(trigger == RISING) {
+    pin3_hightime = micros();
+  } else if (trigger == FALLING) {    
+    pwm2_value = micros()-pin3_hightime;
+  }
+}
