@@ -18,8 +18,8 @@ typedef struct {
 rgb_s led_sequence[LED_MAX_SEQUENCE_COUNT];
 
 //                  0 1  2  3  4  5  6  7  8  9  10 11 12 13
-int dpintoport[] = {1,1, 1 ,1 ,1 ,1 ,1 ,0 ,0 ,0 ,1 ,1 ,1 ,0 };
-int dpintopin[]  = {3,10,11,12,15,13,14,23,21,27,2 ,1 ,8 ,13};
+int dpintoport[] = {1,1, 1 ,1 ,1 ,1 ,1 ,0 ,0 ,0 ,1 ,1 ,1 };
+int dpintopin[]  = {3,10,11,12,15,13,14,23,21,27,2 ,1 ,8 };
 
 // Reset Button Pressed Flag on Read
 bool wasButtonPressed()
@@ -71,7 +71,6 @@ void clearAllFlags(uint32_t ledMode)
 void io_Thread()
 {
     int pressedtime=0;
-    bool led_is_on=false;
     int led_on_time=25;
     int led_off_time=200;
     int rgb_sequence_no=0;
@@ -97,12 +96,6 @@ void io_Thread()
         } else {
             led_on_time = 25;
             led_off_time = 200;
-        }
-
-        if((!led_is_on && (_counter % led_off_time == 0)) ||
-            (led_is_on && (_counter % led_on_time == 0))) {
-            led_is_on = !led_is_on;
-            digitalWrite(LED_BUILTIN,led_is_on);
         }
 
         // Bluetooth Connected - Blue light on solid
@@ -225,7 +218,6 @@ void io_init()
     pinMode(ARDUINO_A7, GPIO_INPUT); // Analog input
 
     // Leds
-    pinMode(LED_BUILTIN, GPIO_OUTPUT);
     pinMode(ARDUINO_LEDPWR, GPIO_OUTPUT);
     pinMode(LEDR, GPIO_OUTPUT);
     pinMode(LEDG, GPIO_OUTPUT);
@@ -234,6 +226,12 @@ void io_init()
     digitalWrite(LEDR,HIGH);
     digitalWrite(LEDG,HIGH);
     digitalWrite(LEDB,HIGH);
+
+    pinMode(ARDUINO_D5, GPIO_OUTPUT);
+    pinMode(ARDUINO_D6, GPIO_OUTPUT);
+    digitalWrite(ARDUINO_D5,HIGH);
+    digitalWrite(ARDUINO_D6,HIGH);
+
 
     ioThreadRun = true;
 }

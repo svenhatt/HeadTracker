@@ -30,14 +30,11 @@ extern int dpintoport[];
 #define ARDUINO_D4 (32 * 1 + 15)                        /* P1.15 */
 #define ARDUINO_D5 (32 * 1 + 13)                        /* P1.13 */
 #define ARDUINO_D6 (32 * 1 + 14)                        /* P1.14 */
-#define ARDUINO_D7 (32 * 0 + 23)                        /* P0.23 */
 
 #define ARDUINO_D8 (32 * 0 + 21)                        /* P0.21 */
 #define ARDUINO_D9 (32 * 0 + 27)                        /* P0.27 */
 #define ARDUINO_D10 (32 * 1 + 2)                        /* P1.2 */
-#define ARDUINO_D11_MOSI (32 * 1 + 1)                   /* P1.1 */
-#define ARDUINO_D12_MISO (32 * 1 + 8)                   /* P1.8 */
-#define ARDUINO_D13_SCK (32 * 0 + 13)                   /* P0.13 */
+
 
 #define ARDUINO_A0 (32 * 0 + 4)                         /* P0.4 */
 #define ARDUINO_A1 (32 * 0 + 5)                         /* P0.5 */
@@ -76,7 +73,6 @@ extern int dpintoport[];
 #define LEDR ARDUINO_LEDR
 #define LEDG ARDUINO_LEDG
 #define LEDB ARDUINO_LEDB
-#define LED_BUILTIN ARDUINO_D13_SCK
 #define INPUT_PULLUP (GPIO_INPUT|GPIO_PULL_UP)
 #define pinMode(pin, mode) gpio_pin_configure(gpios[pin / 32], pin % 32, mode)
 #define digitalWrite(pin, value) gpio_pin_set(gpios[pin / 32], pin % 32, value)

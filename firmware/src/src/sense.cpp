@@ -25,14 +25,16 @@
 #include "bluetooth/ble.h"
 #include "MadgwickAHRS/MadgwickAHRS.h"
 #include "SBUS/sbus.h"
-#include "APDS9960/APDS9960.h"
+//#include "APDS9960/APDS9960.h"
 #include "PWM/pmw.h"
-#include "LSM9DS1/LSM9DS1.h"
+//#include "LSM9DS1/LSM9DS1.h"
 #include "Joystick/joystick.h"
 #include "filters.h"
 #include "io.h"
 #include "Analog/analog.h"
 #include "filters/SF1eFilter.h"
+#include "MCP492X/MCP492X.h"
+
 
 static float auxdata[10];
 static float raccx=0,raccy=0,raccz=0;
@@ -43,9 +45,9 @@ static float magx=0,magy=0,magz=0;
 static float gyrx=0,gyry=0,gyrz=0;
 static float tilt=0,roll=0,pan=0;
 static float rolloffset=0, panoffset=0, tiltoffset=0;
-static float magxoff=0, magyoff=0, magzoff=0;
-static float accxoff=0, accyoff=0, acczoff=0;
-static float gyrxoff=0, gyryoff=0, gyrzoff=0;
+//static float magxoff=0, magyoff=0, magzoff=0;
+//static float accxoff=0, accyoff=0, acczoff=0;
+//static float gyrxoff=0, gyryoff=0, gyrzoff=0;
 static float l_panout=0, l_tiltout=0, l_rollout=0;
 static bool trpOutputEnabled = false; // Default to disabled T/R/P output
 volatile bool gyro_calibrated = false;
@@ -63,12 +65,12 @@ Madgwick madgwick;
 
 int64_t usduration=0;
 
-static bool blesenseboard=false;
-static bool lastproximity=false;
+//static bool blesenseboard=false;
+//static bool lastproximity=false;
 
 K_MUTEX_DEFINE(sensor_mutex);
 
-LSM9DS1Class IMU;
+//LSM9DS1Class IMU;
 
 // Initial Orientation Data+Vars
 #define MADGINIT_ACCEL 0x01
@@ -88,19 +90,19 @@ volatile bool senseTreadRun = false;
 
 int sense_Init()
 {
-    if (!IMU.begin()) {
-        serialWriteln("Failed to initalize sensors");
-        return -1;
-    }
+    //if (!IMU.begin()) {
+    //    serialWriteln("Failed to initalize sensors");
+    //    return -1;
+    //}
 
     // Initalize Gesture Sensor
-    if(!APDS.begin()) {
-        blesenseboard = false;
-        trkset.setSenseboard(false);
-    } else {
-        blesenseboard = true;
-        trkset.setSenseboard(true);
-    }
+    //if(!APDS.begin()) {
+    //    blesenseboard = false;
+    //    trkset.setSenseboard(false);
+    //} else {
+    //    blesenseboard = true;
+    //    trkset.setSenseboard(true);
+    //}
 
     for(int i = 0; i< BT_CHANNELS; i++) {
         bt_chansf[i] = 0;
@@ -338,42 +340,60 @@ void calculate_Thread()
             channel_data[i] = 0;
 
         // 2) Read all PPM inputs
-        PpmIn_execute();
-        for(int i=0;i<16;i++)
-            ppm_in_chans[i] = 0;    // Reset all PPM in channels to Zero (Not active)
-        int ppm_in_chcnt = PpmIn_getChannels(ppm_in_chans);
-        if(ppm_in_chcnt >= 4 && ppm_in_chcnt <= 16) {
-            for(int i=0;i<MIN(ppm_in_chcnt,16);i++) {
-                channel_data[i] = ppm_in_chans[i];
-            }
-        }
+        //PpmIn_execute();
+        //for(int i=0;i<16;i++)
+        //    ppm_in_chans[i] = 0;    // Reset all PPM in channels to Zero (Not active)
+        //int ppm_in_chcnt = PpmIn_getChannels(ppm_in_chans);
+        //if(ppm_in_chcnt >= 4 && ppm_in_chcnt <= 16) {
+        //    for(int i=0;i<MIN(ppm_in_chcnt,16);i++) {
+        //        channel_data[i] = ppm_in_chans[i];
+        //    }
+        //}
 
         // 3) Set all incoming SBUS values
-        static float sbustimer=TrackerSettings::SBUS_ACTIVE_TIME;
-        static bool lostmsgsent=false;
-        static bool recmsgsent=false;
-        sbustimer += (float)CALCULATE_PERIOD / 1000000.0;
-        if(SBUS_Read_Data(sbus_in_chans)) { // Valid SBUS packet received?
-            sbustimer = 0;
-        }
+        //static float sbustimer=TrackerSettings::SBUS_ACTIVE_TIME;
+        //static bool lostmsgsent=false;
+        //static bool recmsgsent=false;
+        //sbustimer += (float)CALCULATE_PERIOD / 1000000.0;
+        //if(SBUS_Read_Data(sbus_in_chans)) { // Valid SBUS packet received?
+        //    sbustimer = 0;
+        //}
         // SBUS not received within XX time, disable
-        if(sbustimer > TrackerSettings::SBUS_ACTIVE_TIME) {
-            for(int i=0; i < 16; i++)
-                sbus_in_chans[i] = 0;
-            if(!lostmsgsent) {
-                serialWriteln("HT: SBUS Data Lost");
-                lostmsgsent = true;
-            }
-            recmsgsent = false;
+        //if(sbustimer > TrackerSettings::SBUS_ACTIVE_TIME) {
+        //    for(int i=0; i < 16; i++)
+        //        sbus_in_chans[i] = 0;
+        //    if(!lostmsgsent) {
+        //        serialWriteln("HT: SBUS Data Lost");
+        //        lostmsgsent = true;
+        //    }
+        //    recmsgsent = false;
         // SBUS data still valid, set the channel values to the last SBUS
-        } else {
-            for(int i=0; i < 16; i++)
-                channel_data[i] = sbus_in_chans[i];
-            if(!recmsgsent) {
-                serialWriteln("HT: SBUS Data Received");
-                recmsgsent = true;
-            }
-            lostmsgsent = false;
+        //} else {
+        //    for(int i=0; i < 16; i++)
+        //        channel_data[i] = sbus_in_chans[i];
+        //    if(!recmsgsent) {
+        //        serialWriteln("HT: SBUS Data Received");
+        //        recmsgsent = true;
+        //    }
+        //    lostmsgsent = false;
+        //}
+
+        // 7) Set Analog Channels
+        if(trkset.analog4Ch() > 0) {
+            float an4 = SF1eFilterDo(anFilter[0], analogRead(AN4));
+            an4 *= trkset.analog4Gain();
+            an4 += trkset.analog4Offset();
+            an4 += TrackerSettings::MIN_PWM;
+            an4 = MAX(TrackerSettings::MIN_PWM,MIN(TrackerSettings::MAX_PWM,an4));
+            channel_data[trkset.analog4Ch()-1] = an4;
+        }
+        if(trkset.analog5Ch() > 0) {
+            float an5 = SF1eFilterDo(anFilter[1], analogRead(AN5));
+            an5 *= trkset.analog5Gain();
+            an5 += trkset.analog5Offset();
+            an5 += TrackerSettings::MIN_PWM;
+            an5 = MAX(TrackerSettings::MIN_PWM,MIN(TrackerSettings::MAX_PWM,an5));
+            channel_data[trkset.analog5Ch()-1] = an5;
         }
 
         // 4) Set all incoming BT values
@@ -409,110 +429,94 @@ void calculate_Thread()
         }*/ //REMOVED as of V2.1
 
         // 6) Set Auxiliary Functions
-        int aux0ch = trkset.auxFunc0Ch();
-        int aux1ch = trkset.auxFunc1Ch();
-        int aux2ch = trkset.auxFunc2Ch();
-        if(aux0ch > 0 || aux1ch > 0) {
-            buildAuxData();
-            if(aux0ch > 0)
-                channel_data[aux0ch - 1] = auxdata[trkset.auxFunc0()];
-            if(aux1ch > 0)
-                channel_data[aux1ch - 1] = auxdata[trkset.auxFunc1()];
-            if(aux2ch > 0)
-                channel_data[aux2ch - 1] = auxdata[trkset.auxFunc2()];
-        }
+        //int aux0ch = trkset.auxFunc0Ch();
+        //int aux1ch = trkset.auxFunc1Ch();
+        //int aux2ch = trkset.auxFunc2Ch();
+        //if(aux0ch > 0 || aux1ch > 0) {
+        //    buildAuxData();
+        //    if(aux0ch > 0)
+        //        channel_data[aux0ch - 1] = auxdata[trkset.auxFunc0()];
+        //    if(aux1ch > 0)
+        //        channel_data[aux1ch - 1] = auxdata[trkset.auxFunc1()];
+        //    if(aux2ch > 0)
+        //        channel_data[aux2ch - 1] = auxdata[trkset.auxFunc2()];
+        //}
 
-        // 7) Set Analog Channels
-        if(trkset.analog4Ch() > 0) {
-            float an4 = SF1eFilterDo(anFilter[0], analogRead(AN4));
-            an4 *= trkset.analog4Gain();
-            an4 += trkset.analog4Offset();
-            an4 += TrackerSettings::MIN_PWM;
-            an4 = MAX(TrackerSettings::MIN_PWM,MIN(TrackerSettings::MAX_PWM,an4));
-            channel_data[trkset.analog4Ch()-1] = an4;
-        }
-        if(trkset.analog5Ch() > 0) {
-            float an5 = SF1eFilterDo(anFilter[1], analogRead(AN5));
-            an5 *= trkset.analog5Gain();
-            an5 += trkset.analog5Offset();
-            an5 += TrackerSettings::MIN_PWM;
-            an5 = MAX(TrackerSettings::MIN_PWM,MIN(TrackerSettings::MAX_PWM,an5));
-            channel_data[trkset.analog5Ch()-1] = an5;
-        }
-        if(trkset.analog6Ch() > 0) {
-	        float an6 = SF1eFilterDo(anFilter[2], analogRead(AN6));
-            an6 *= trkset.analog6Gain();
-            an6 += trkset.analog6Offset();
-            an6 += TrackerSettings::MIN_PWM;
-            an6 = MAX(TrackerSettings::MIN_PWM,MIN(TrackerSettings::MAX_PWM,an6));
-            channel_data[trkset.analog6Ch()-1] = an6;
-        }
-        if(trkset.analog7Ch() > 0) {
-            float an7 = SF1eFilterDo(anFilter[3], analogRead(AN7));
-            an7 *= trkset.analog7Gain();
-            an7 += trkset.analog7Offset();
-            an7 += TrackerSettings::MIN_PWM;
-            an7 = MAX(TrackerSettings::MIN_PWM,MIN(TrackerSettings::MAX_PWM,an7));
-            channel_data[trkset.analog7Ch()-1] = an7;
-        }
+
+        //if(trkset.analog6Ch() > 0) {
+	    //    float an6 = SF1eFilterDo(anFilter[2], analogRead(AN6));
+        //    an6 *= trkset.analog6Gain();
+        //    an6 += trkset.analog6Offset();
+        //    an6 += TrackerSettings::MIN_PWM;
+        //    an6 = MAX(TrackerSettings::MIN_PWM,MIN(TrackerSettings::MAX_PWM,an6));
+        //    channel_data[trkset.analog6Ch()-1] = an6;
+        //}
+        //if(trkset.analog7Ch() > 0) {
+        //    float an7 = SF1eFilterDo(anFilter[3], analogRead(AN7));
+        //    an7 *= trkset.analog7Gain();
+        //    an7 += trkset.analog7Offset();
+        //    an7 += TrackerSettings::MIN_PWM;
+        //    an7 = MAX(TrackerSettings::MIN_PWM,MIN(TrackerSettings::MAX_PWM,an7));
+        //    channel_data[trkset.analog7Ch()-1] = an7;
+        //}
 
         // 8) First decide if 'reset center' pulse should be sent
 
-        static float pulsetimer=0;
-        static bool sendingresetpulse = false;
-        int alertch = trkset.alertCh();
-        if (alertch > 0) {
-            // Synthesize a pulse indicating reset center started
-            channel_data[alertch - 1] = TrackerSettings::MIN_PWM;
-            if (butdnw) {
-                sendingresetpulse = true;
-                pulsetimer=0;
-            }
-            if (sendingresetpulse) {
-                channel_data[alertch - 1] = TrackerSettings::MAX_PWM;
-                pulsetimer += (float)CALCULATE_PERIOD / 1000000.0;
-                if(pulsetimer > TrackerSettings::RECENTER_PULSE_DURATION) {
-                    sendingresetpulse = false;
-                }
-            }
-        }
+        //static float pulsetimer=0;
+        //static bool sendingresetpulse = false;
+        //int alertch = trkset.alertCh();
+        //if (alertch > 0) {
+        //    // Synthesize a pulse indicating reset center started
+        //    channel_data[alertch - 1] = TrackerSettings::MIN_PWM;
+        //    if (butdnw) {
+        //        sendingresetpulse = true;
+        //        pulsetimer=0;
+        //    }
+        //    if (sendingresetpulse) {
+        //        channel_data[alertch - 1] = TrackerSettings::MAX_PWM;
+        //        pulsetimer += (float)CALCULATE_PERIOD / 1000000.0;
+        //        if(pulsetimer > TrackerSettings::RECENTER_PULSE_DURATION) {
+        //            sendingresetpulse = false;
+        //        }
+        //    }
+        //}
 
         // 9) Then, set Tilt/Roll/Pan Channel Values (after reset center in case of channel overlap)
 
         // If the long press for enable/disable isn't set or if there is no reset button configured
         //   always enable the T/R/P outputs
-        static bool lastbutmode = false;
-        bool buttonpresmode = trkset.buttonPressMode();
-        if(buttonpresmode == false || trkset.buttonPin() == 0)
-            trpOutputEnabled = true;
-
+        //static bool lastbutmode = false;
+        //bool buttonpresmode = trkset.buttonPressMode();
+        //if(buttonpresmode == false || trkset.buttonPin() == 0)
+        //    trpOutputEnabled = true;
+        //
         // On user enabling the button press mode in the GUI default to TRP output off.
-        if(lastbutmode == false && buttonpresmode == true) {
-            trpOutputEnabled = false;
-        }
-        lastbutmode = buttonpresmode;
+        //if(lastbutmode == false && buttonpresmode == true) {
+        //    trpOutputEnabled = false;
+        //}
+        //lastbutmode = buttonpresmode;
 
         // If gyro isn't calibrated, don't output TRP
-        if(!gyro_calibrated)
-            trpOutputEnabled = false;
+        //if(!gyro_calibrated)
+        //    trpOutputEnabled = false;
 
-        int tltch = trkset.tiltCh();
-        int rllch = trkset.rollCh();
-        int panch = trkset.panCh();
-        if(tltch > 0)
-            channel_data[tltch - 1] = trpOutputEnabled == true ? tiltout_ui : trkset.Tlt_cnt();
-        if(rllch > 0)
-            channel_data[rllch - 1] = trpOutputEnabled == true ? rollout_ui : trkset.Rll_cnt();
-        if(panch > 0)
-            channel_data[panch - 1] = trpOutputEnabled == true ? panout_ui : trkset.Pan_cnt();
+        //int tltch = trkset.tiltCh();
+        //int rllch = trkset.rollCh();
+        //int panch = trkset.panCh();
+        //if(tltch > 0)
+        //    channel_data[tltch - 1] = trpOutputEnabled == true ? tiltout_ui : trkset.Tlt_cnt();
+        //if(rllch > 0)
+        //    channel_data[rllch - 1] = trpOutputEnabled == true ? rollout_ui : trkset.Rll_cnt();
+        //if(panch > 0)
+        //    channel_data[panch - 1] = trpOutputEnabled == true ? panout_ui : trkset.Pan_cnt();
 
         // 10) Set the PPM Outputs
-        for(int i=0;i<PpmOut_getChnCount();i++) {
-            uint16_t ppmout = channel_data[i];
-            if(ppmout == 0)
-                ppmout = TrackerSettings::PPM_CENTER;
-            PpmOut_setChannel(i,ppmout);
-        }
+        //for(int i=0;i<PpmOut_getChnCount();i++) {
+        //    uint16_t ppmout = channel_data[i];
+        //    if(ppmout == 0)
+        //        ppmout = TrackerSettings::PPM_CENTER;
+        //    PpmOut_setChannel(i,ppmout);
+        //}
 
         // 11) Set all the BT Channels, send the zeros don't center
         bool bleconnected=BTGetConnected();
@@ -522,32 +526,45 @@ void calculate_Thread()
         }
 
         // 12) Set all SBUS output channels, if disabled set to center
-        uint16_t sbus_data[16];
-        for(int i=0;i<16;i++) {
-            uint16_t sbusout = channel_data[i];
-            if(sbusout == 0)
-                sbusout = TrackerSettings::PPM_CENTER;
-            sbus_data[i] = (static_cast<float>(sbusout) - TrackerSettings::PPM_CENTER) * TrackerSettings::SBUS_SCALE + TrackerSettings::SBUS_CENTER;
-        }
-        SBUS_TX_BuildData(sbus_data);
+        //uint16_t sbus_data[16];
+        //for(int i=0;i<16;i++) {
+        //    uint16_t sbusout = channel_data[i];
+        //    if(sbusout == 0)
+        //        sbusout = TrackerSettings::PPM_CENTER;
+        //    sbus_data[i] = (static_cast<float>(sbusout) - TrackerSettings::PPM_CENTER) * TrackerSettings::SBUS_SCALE + TrackerSettings::SBUS_CENTER;
+        //}
+        //SBUS_TX_BuildData(sbus_data);
 
         // 13) Set PWM Channels
-        for(int i=0;i<4;i++) {
-            int pwmch = trkset.PWMCh(i)-1;
-            if(pwmch >= 0 && pwmch < 16) {
-                uint16_t pwmout = channel_data[pwmch];
-                if(pwmout == 0)
-                    pwmout = TrackerSettings::PPM_CENTER;
-                setPWMValue(i,pwmout);
-            }
-        }
+        //for(int i=0;i<4;i++) {
+        //    int pwmch = trkset.PWMCh(i)-1;
+        //    if(pwmch >= 0 && pwmch < 16) {
+        //        uint16_t pwmout = channel_data[pwmch];
+        //        if(pwmout == 0)
+        //            pwmout = TrackerSettings::PPM_CENTER;
+        //        setPWMValue(i,pwmout);
+        //    }
+        //}
 
         // 14 Set USB Joystick Channels, Only 8 channels
-        static int joycnt=0;
-        if(joycnt++ == 1) {
-            set_JoystickChannels(channel_data);
-            joycnt=0;
-        }
+        //static int joycnt=0;
+        //if(joycnt++ == 1) {
+        //    set_JoystickChannels(channel_data);
+        //    joycnt=0;
+        //}
+
+        // 13) Set DAC Channels
+        setDACValue(0,((channel_data[0]*4)-3950));
+        rt_sleep_us(150);
+        setDACValue(1,((channel_data[1]*4)-3950));
+        rt_sleep_us(150);
+        digitalWrite(ARDUINO_D5,LOW);
+        rt_sleep_us(20);
+        digitalWrite(ARDUINO_D5,HIGH);
+
+
+
+
 
         // Update the settings for the GUI
         // Both data and sensor threads will use this data. If data thread has it locked skip this reading.
@@ -603,10 +620,10 @@ void calculate_Thread()
 void sensor_Thread()
 {
     // Gyro Calibration
-    float avg[3] = {0,0,0};
-    float lavg[3] = {0,0,0};
-    bool initrun = true;
-    int passcount = GYRO_STABLE_SAMPLES;
+    //float avg[3] = {0,0,0};
+    //float lavg[3] = {0,0,0};
+    //bool initrun = true;
+    //int passcount = GYRO_STABLE_SAMPLES;
 
     while(1) {
         rt_sleep_us(SENSOR_PERIOD);
@@ -616,157 +633,157 @@ void sensor_Thread()
         }
 
         // Reset Center on Proximity, Don't need to update this often
-        static int sensecount=0;
-        static int minproximity=100; // Keeps smallest proximity read.
-        static int maxproximity=0; // Keeps largest proximity value read.
-        if(blesenseboard && sensecount++ == 10) {
-            sensecount = 0;
-            if (trkset.resetOnWave()) {
-                // Reset on Proximity
-                if(APDS.proximityAvailable()) {
-                    int proximity = APDS.readProximity();
+        //static int sensecount=0;
+        //static int minproximity=100; // Keeps smallest proximity read.
+        //static int maxproximity=0; // Keeps largest proximity value read.
+        //if(blesenseboard && sensecount++ == 10) {
+        //    sensecount = 0;
+        //    if (trkset.resetOnWave()) {
+        //        // Reset on Proximity
+        //        if(APDS.proximityAvailable()) {
+        //            int proximity = APDS.readProximity();
 
                     /*serialWrite("HT: Prox=");
                     serialWrite(proximity);
                     serialWriteln();*/
 
                     // Store High and Low Values, Generate reset thresholds
-                    maxproximity = MAX(proximity, maxproximity);
-                    minproximity = MIN(proximity, minproximity);
-                    int lowthreshold = minproximity + APDS_HYSTERISIS;
-                    int highthreshold = maxproximity - APDS_HYSTERISIS;
+        //            maxproximity = MAX(proximity, maxproximity);
+        //            minproximity = MIN(proximity, minproximity);
+        //            int lowthreshold = minproximity + APDS_HYSTERISIS;
+        //            int highthreshold = maxproximity - APDS_HYSTERISIS;
 
                     // Don't allow reset if high and low thresholds are too close
-                    if(highthreshold - lowthreshold > APDS_HYSTERISIS*2) {
-                        if (proximity < lowthreshold && lastproximity == false) {
-                            pressButton();
-                            serialWriteln("HT: Reset center from a close proximity");
-                            lastproximity = true;
-                        } else if(proximity > highthreshold) {
+        //            if(highthreshold - lowthreshold > APDS_HYSTERISIS*2) {
+        //                if (proximity < lowthreshold && lastproximity == false) {
+        //                    pressButton();
+        //                    serialWriteln("HT: Reset center from a close proximity");
+        //                    lastproximity = true;
+        //                } else if(proximity > highthreshold) {
                             // Clear flag on proximity clear
-                            lastproximity = false;
-                        }
-                    }
-                }
-            }
-        }
+        //                    lastproximity = false;
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
 
         // Setup Rotations
-        float rotation[3];
-        trkset.orientRotations(rotation);
+        //float rotation[3];
+        //trkset.orientRotations(rotation);
 
         // Accelerometer
-        if(IMU.accelerationAvailable()) {
-            IMU.readRawAccel(raccx, raccy, raccz);
-            raccx *= -1.0; // Flip X to make classic cartesian (+X Right, +Y Up, +Z Vert)
-            trkset.accOffset(accxoff,accyoff,acczoff);
+        //if(IMU.accelerationAvailable()) {
+        //    IMU.readRawAccel(raccx, raccy, raccz);
+        //    raccx *= -1.0; // Flip X to make classic cartesian (+X Right, +Y Up, +Z Vert)
+        //    trkset.accOffset(accxoff,accyoff,acczoff);
 
-            k_mutex_lock(&sensor_mutex, K_FOREVER);
+        //    k_mutex_lock(&sensor_mutex, K_FOREVER);
 
-            accx = raccx - accxoff;
-            accy = raccy - accyoff;
-            accz = raccz - acczoff;
+        //    accx = raccx - accxoff;
+        //    accy = raccy - accyoff;
+        //    accz = raccz - acczoff;
 
             // Apply Rotation
-            float tmpacc[3] = {accx,accy,accz};
-            rotate(tmpacc,rotation);
-            accx = tmpacc[0]; accy = tmpacc[1]; accz = tmpacc[2];
+        //    float tmpacc[3] = {accx,accy,accz};
+        //    rotate(tmpacc,rotation);
+        //    accx = tmpacc[0]; accy = tmpacc[1]; accz = tmpacc[2];
 
             // For intial orientation setup
-            madgsensbits |= MADGINIT_ACCEL;
+        //    madgsensbits |= MADGINIT_ACCEL;
 
-            k_mutex_unlock(&sensor_mutex);
-        }
+        //    k_mutex_unlock(&sensor_mutex);
+        //}
 
         // Gyrometer
-        if(IMU.gyroscopeAvailable()) {
-            IMU.readRawGyro(rgyrx,rgyry,rgyrz);
-            rgyrx *= -1.0; // Flip X to match other sensors
-
-            if(!gyro_calibrated) {
-                if(initrun) { // Preload on first read
-                    avg[0] = rgyrx; avg[1] = rgyry; avg[2] = rgyrz;
-                    lavg[0] = rgyrx; lavg[1] = rgyry; lavg[2] = rgyrz;
-                    initrun = false;
-                } else {
-                    avg[0] = (avg[0] * GYRO_LP_BETA) + (rgyrx * (1.0-GYRO_LP_BETA));
-                    avg[1] = (avg[1] * GYRO_LP_BETA) + (rgyry * (1.0-GYRO_LP_BETA));
-                    avg[2] = (avg[2] * GYRO_LP_BETA) + (rgyrz * (1.0-GYRO_LP_BETA));
-
+        //if(IMU.gyroscopeAvailable()) {
+        //    IMU.readRawGyro(rgyrx,rgyry,rgyrz);
+        //    rgyrx *= -1.0; // Flip X to match other sensors
+        //
+        //    if(!gyro_calibrated) {
+        //        if(initrun) { // Preload on first read
+        //            avg[0] = rgyrx; avg[1] = rgyry; avg[2] = rgyrz;
+        //            lavg[0] = rgyrx; lavg[1] = rgyry; lavg[2] = rgyrz;
+        //            initrun = false;
+        //        } else {
+        //            avg[0] = (avg[0] * GYRO_LP_BETA) + (rgyrx * (1.0-GYRO_LP_BETA));
+        //            avg[1] = (avg[1] * GYRO_LP_BETA) + (rgyry * (1.0-GYRO_LP_BETA));
+        //            avg[2] = (avg[2] * GYRO_LP_BETA) + (rgyrz * (1.0-GYRO_LP_BETA));
+        //
                     // Calculate differential of signal
-                    float diff[3];
-                    for(int i=0; i < 3; i++) {
-                        diff[i] = fabs(avg[i] - lavg[i]) / (SENSOR_PERIOD/1000000.0);
-                        lavg[i] = avg[i];
-                    }
+        //            float diff[3];
+        //            for(int i=0; i < 3; i++) {
+        //                diff[i] = fabs(avg[i] - lavg[i]) / (SENSOR_PERIOD/1000000.0);
+        //                lavg[i] = avg[i];
+        //            }
 
                     // If rate of change low then decrement the counter
-                    if(diff[0] < GYRO_PASS_DIFF &&
-                       diff[1] < GYRO_PASS_DIFF &&
-                       diff[2] < GYRO_PASS_DIFF)
-                        passcount--;
+        //            if(diff[0] < GYRO_PASS_DIFF &&
+        //               diff[1] < GYRO_PASS_DIFF &&
+        //               diff[2] < GYRO_PASS_DIFF)
+        //                passcount--;
                     // Otherwise start over
-                    else {
-                        passcount = GYRO_STABLE_SAMPLES;
-                        initrun = true;
-                    }
+        //            else {
+        //                passcount = GYRO_STABLE_SAMPLES;
+        //                initrun = true;
+        //            }
 
                     // If enough samples taken at low motion, Success
-                    if(passcount == 0) {
-                        trkset.setGyroOffset(avg[0],avg[1],avg[2]);
-                        clearLEDFlag(LED_GYROCAL);
-                        gyro_calibrated = true;
-                    }
-                }
-            } else {
+        //            if(passcount == 0) {
+        //                trkset.setGyroOffset(avg[0],avg[1],avg[2]);
+        //                clearLEDFlag(LED_GYROCAL);
+        //                gyro_calibrated = true;
+        //            }
+        //        }
+        //    } else {
 
-                trkset.gyroOffset(gyrxoff,gyryoff,gyrzoff);
+        //        trkset.gyroOffset(gyrxoff,gyryoff,gyrzoff);
 
-                k_mutex_lock(&sensor_mutex, K_FOREVER);
+        //        k_mutex_lock(&sensor_mutex, K_FOREVER);
 
-                gyrx = rgyrx - gyrxoff;
-                gyry = rgyry - gyryoff;
-                gyrz = rgyrz - gyrzoff;
+        //        gyrx = rgyrx - gyrxoff;
+        //        gyry = rgyry - gyryoff;
+        //        gyrz = rgyrz - gyrzoff;
 
                 // Apply Rotation
-                float tmpgyr[3] = {gyrx,gyry,gyrz};
-                rotate(tmpgyr,rotation);
-                gyrx = tmpgyr[0]; gyry = tmpgyr[1]; gyrz = tmpgyr[2];
+        //        float tmpgyr[3] = {gyrx,gyry,gyrz};
+        //        rotate(tmpgyr,rotation);
+        //        gyrx = tmpgyr[0]; gyry = tmpgyr[1]; gyrz = tmpgyr[2];
 
-                k_mutex_unlock(&sensor_mutex);
-            }
-        }
+        //        k_mutex_unlock(&sensor_mutex);
+        //    }
+        //}
 
         // Magnetometer
-        if(IMU.magneticFieldAvailable()) {
-            IMU.readRawMagnet(rmagx,rmagy,rmagz);
+        //if(IMU.magneticFieldAvailable()) {
+        //    IMU.readRawMagnet(rmagx,rmagy,rmagz);
             // On first read set the min/max values to this reading
             // Get Offsets + Soft Iron Offesets
-            float magsioff[9];
-            trkset.magOffset(magxoff,magyoff,magzoff);
-            trkset.magSiOffset(magsioff);
+        //    float magsioff[9];
+        //    trkset.magOffset(magxoff,magyoff,magzoff);
+        //    trkset.magSiOffset(magsioff);
 
-            k_mutex_lock(&sensor_mutex, K_FOREVER);
+        //    k_mutex_lock(&sensor_mutex, K_FOREVER);
 
             // Calibrate Hard Iron Offsets
-            magx = rmagx - magxoff;
-            magy = rmagy - magyoff;
-            magz = rmagz - magzoff;
+        //    magx = rmagx - magxoff;
+        //    magy = rmagy - magyoff;
+        //    magz = rmagz - magzoff;
 
-            magx = (magx * magsioff[0]) + (magy * magsioff[1]) + (magz * magsioff[2]);
-            magy = (magx * magsioff[3]) + (magy * magsioff[4]) + (magz * magsioff[5]);
-            magz = (magx * magsioff[6]) + (magy * magsioff[7]) + (magz * magsioff[8]);
+        //    magx = (magx * magsioff[0]) + (magy * magsioff[1]) + (magz * magsioff[2]);
+        //    magy = (magx * magsioff[3]) + (magy * magsioff[4]) + (magz * magsioff[5]);
+        //    magz = (magx * magsioff[6]) + (magy * magsioff[7]) + (magz * magsioff[8]);
 
             // Apply Rotation
-            float tmpmag[3] = {magx,magy,magz};
-            rotate(tmpmag, rotation);
-            magx = tmpmag[0]; magy = tmpmag[1]; magz = tmpmag[2];
+        //    float tmpmag[3] = {magx,magy,magz};
+        //    rotate(tmpmag, rotation);
+        //    magx = tmpmag[0]; magy = tmpmag[1]; magz = tmpmag[2];
 
             // For inital orientation setup
-            madgsensbits |= MADGINIT_MAG;
+        //    madgsensbits |= MADGINIT_MAG;
 
-            k_mutex_unlock(&sensor_mutex);
-        }
+        //    k_mutex_unlock(&sensor_mutex);
+        //}
     } // END THREAD
 }
 

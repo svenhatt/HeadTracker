@@ -14,6 +14,7 @@
 #include "nano33ble.h"
 #include "io.h"
 
+
 #ifdef DISABLE_SLEEP_STATES
 
 static int disable_ds_1(const struct device *dev)
@@ -43,16 +44,18 @@ static int board_internal_sensors_init(const struct device *dev)
 {
 	ARG_UNUSED(dev);
 
+
+
 	io_init();
 
-	NRF_PWM_Type * PWM[] = {
-		NRF_PWM0, NRF_PWM1, NRF_PWM2, NRF_PWM3
-	};
+	//NRF_PWM_Type * PWM[] = {
+	//	NRF_PWM0, NRF_PWM1, NRF_PWM2, NRF_PWM3
+	//};
 
-	for (unsigned int i = 0; i < (ARRAY_SIZE(PWM)); i++) {
-		PWM[i]->ENABLE = 0;
-		PWM[i]->PSEL.OUT[0] = 0xFFFFFFFFUL;
-	}
+	//for (unsigned int i = 0; i < (ARRAY_SIZE(PWM)); i++) {
+	//	PWM[i]->ENABLE = 0;
+	//	PWM[i]->PSEL.OUT[0] = 0xFFFFFFFFUL;
+	//}
 
 	return 0;
 }

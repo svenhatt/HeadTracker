@@ -13,6 +13,8 @@
 #include "log.h"
 #include "Analog/analog.h"
 #include "trackersettings.h"
+#include "MCP492X/MCP492X.h"
+
 
 #include <drivers/clock_control.h>
 #include <drivers/clock_control/nrf_clock_control.h>
@@ -22,7 +24,7 @@
 #define CLOCK_NODE DT_INST(0, nordic_nrf_clock)
 static const struct device *clock0;
 
-bool led_is_on = false;
+//bool led_is_on = false;
 
 TrackerSettings trkset;
 
@@ -37,7 +39,10 @@ void start(void)
     clock_control_on(clock0,CLOCK_CONTROL_NRF_SUBSYS_HF);
 
     // USB Joystick
-    joystick_init();
+    //joystick_init();
+
+    // DAC
+    DAC_init();
 
     // Setup Serial
     serial_init();
@@ -49,10 +54,14 @@ void start(void)
     bt_init();
 
     // Start SBUS - SBUS/uarte_sbus.cpp (Pins D0/TX, D1/RX)
-    sbus_init();
+    //sbus_init();
 
     // PWM Outputs - Fixed to A0-A3
-    PWM_Init(PWM_FREQUENCY);
+    //PWM_Init(PWM_FREQUENCY);
+
+    // DAC
+
+
 
     // Load settings from flash - trackersettings.cpp
     trkset.loadFromEEPROM();

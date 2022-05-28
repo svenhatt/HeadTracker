@@ -66,4 +66,3 @@
 &timer4 {
     status = "disabled";
 };
-
